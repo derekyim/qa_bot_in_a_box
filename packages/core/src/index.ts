@@ -10,4 +10,7 @@ export function createQaBotCore(): QaBotCore {
 
 export { TestCaseStore } from './TestCaseStore.js';
 export { SpiderAgent } from './SpiderAgent.js';
-export type { TestCase, FormatAStep } from './types.js';
+export { RunStore } from './RunStore.js';
+export { PlaywrightRunner } from './PlaywrightRunner.js';
+export { VisualDiffEngine } from './VisualDiffEngine.js';
+export type { TestCase, FormatAStep, RunResult, RunStep } from './types.js';

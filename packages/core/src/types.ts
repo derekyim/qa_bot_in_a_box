@@ -9,3 +9,20 @@ export interface TestCase {
   createdAt: string;
   steps: FormatAStep[];
 }
+
+export interface RunStep {
+  stepIndex: number;
+  screenshotPath: string;
+  diffImagePath: string;
+  diffPercentage: number;
+  passed: boolean;
+}
+
+export interface RunResult {
+  runId: string;
+  testCaseId: string;
+  startedAt: string;
+  finishedAt: string;
+  passed: boolean;
+  steps: RunStep[];
+}
