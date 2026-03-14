@@ -22,3 +22,5 @@ export { BlacklistManager } from './BlacklistManager.js';
 export { resolveNlSelector } from './NlSelectorResolver.js';
 export type { NlSelectorResolverInput } from './NlSelectorResolver.js';
 export type { TestCase, FormatAStep, FormatBStep, RunResult, RunStep, LLMVerdict } from './types.js';
+export { QaBotCoreAdapter } from './QaBotCoreAdapter.js';
+export type { QaBotAdapter } from './QaBotCoreAdapter.js';
