@@ -34,13 +34,14 @@ export function createDashboardServer(dataDir: string): ReturnType<typeof expres
     }
   });
 
-  // GET /api/runs — list all runs (optionally filtered by testCaseId query param)
+  // GET /api/runs — list all runs (optionally filtered by testId query param), reverse chronological
   app.get('/api/runs', async (req, res) => {
     try {
-      const { testCaseId } = req.query;
-      const runs = testCaseId
-        ? await runStore.listForTestCase(String(testCaseId))
+      const { testId } = req.query;
+      const runs = testId
+        ? await runStore.listForTestCase(String(testId))
         : await runStore.listAll();
+      runs.sort((a, b) => b.startedAt.localeCompare(a.startedAt));
       res.json(runs);
     } catch (err) {
       res.status(500).json({ error: (err as Error).message });

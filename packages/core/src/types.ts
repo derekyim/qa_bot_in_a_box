@@ -3,11 +3,18 @@ export type FormatAStep =
   | { type: 'click'; selector: string }
   | { type: 'fill'; selector: string; value: string };
 
+export interface FormatBStep {
+  intent: string;
+  selector: string;
+  url: string;
+}
+
 export interface TestCase {
   id: string;
   url: string;
   createdAt: string;
   steps: FormatAStep[];
+  formatBSteps?: FormatBStep[];
 }
 
 export interface LLMVerdict {
@@ -28,6 +35,7 @@ export interface RunStep {
 export interface RunResult {
   runId: string;
   testCaseId: string;
+  runnerType: 'playwright' | 'semantic';
   startedAt: string;
   finishedAt: string;
   passed: boolean;

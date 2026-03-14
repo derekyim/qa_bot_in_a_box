@@ -22,6 +22,7 @@ describe('RunStore', () => {
     const run: RunResult = {
       runId: 'run-001',
       testCaseId: 'tc-abc',
+      runnerType: 'playwright',
       startedAt: '2024-01-01T00:00:00.000Z',
       finishedAt: '2024-01-01T00:00:01.000Z',
       passed: true,
@@ -46,6 +47,7 @@ describe('RunStore', () => {
     const run1: RunResult = {
       runId: 'run-001',
       testCaseId: 'tc-abc',
+      runnerType: 'playwright',
       startedAt: '2024-01-01T00:00:00.000Z',
       finishedAt: '2024-01-01T00:00:01.000Z',
       passed: true,
@@ -54,6 +56,7 @@ describe('RunStore', () => {
     const run2: RunResult = {
       runId: 'run-002',
       testCaseId: 'tc-abc',
+      runnerType: 'semantic',
       startedAt: '2024-01-02T00:00:00.000Z',
       finishedAt: '2024-01-02T00:00:01.000Z',
       passed: false,

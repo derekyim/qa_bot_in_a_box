@@ -111,6 +111,7 @@ export class PlaywrightRunner {
     const result: RunResult = {
       runId,
       testCaseId,
+      runnerType: 'playwright',
       startedAt,
       finishedAt: new Date().toISOString(),
       passed,

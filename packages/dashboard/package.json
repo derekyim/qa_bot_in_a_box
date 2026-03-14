@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "echo \"No tests for dashboard stub\" && exit 0",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -21,6 +21,9 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "typescript": "^5.5.0"
+    "supertest": "^7.0.0",
+    "@types/supertest": "^6.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
   }
 }

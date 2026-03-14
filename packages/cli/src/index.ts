@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { program } from 'commander';
 import { resolve } from 'path';
-import { SpiderAgent, TestCaseStore, RunStore, PlaywrightRunner, BlacklistManager } from '@qa-bot/core';
+import { SpiderAgent, TestCaseStore, RunStore, PlaywrightRunner, SemanticRunner, BlacklistManager } from '@qa-bot/core';
 
 export const CLI_VERSION = '0.1.0';
 
@@ -46,20 +46,32 @@ program
 
 program
   .command('run')
-  .description('Run Format A test cases via Playwright')
+  .description('Run test cases (Format A via Playwright, Format B via Stagehand)')
   .option('--test <id>', 'Run only the specified test case ID')
-  .option('--runner <type>', 'Runner type (only "a" supported currently)', 'a')
+  .option('--runner <type>', 'Runner type: "a" (Playwright) or "b" (Stagehand semantic)', 'a')
   .action(async (opts: { test?: string; runner: string }) => {
-    if (opts.runner !== 'a') {
-      console.error(`Unsupported runner: ${opts.runner}. Only "a" is supported.`);
+    if (opts.runner !== 'a' && opts.runner !== 'b') {
+      console.error(`Unsupported runner: ${opts.runner}. Use "a" or "b".`);
       process.exit(1);
     }
 
     const testCaseStore = new TestCaseStore(DATA_DIR);
     const runStore = new RunStore(DATA_DIR);
-    const blacklist = new BlacklistManager(DATA_DIR);
-    const nlApiKey = process.env['ANTHROPIC_API_KEY'];
-    const runner = new PlaywrightRunner(testCaseStore, runStore, {}, blacklist, nlApiKey);
+    const apiKey = process.env['ANTHROPIC_API_KEY'];
+
+    const runner =
+      opts.runner === 'b'
+        ? (() => {
+            if (!apiKey) {
+              console.error('ANTHROPIC_API_KEY is required for runner b (SemanticRunner).');
+              process.exit(1);
+            }
+            return new SemanticRunner(testCaseStore, runStore, {}, { apiKey });
+          })()
+        : (() => {
+            const blacklist = new BlacklistManager(DATA_DIR);
+            return new PlaywrightRunner(testCaseStore, runStore, {}, blacklist, apiKey);
+          })();
 
     let ids: string[];
     if (opts.test) {

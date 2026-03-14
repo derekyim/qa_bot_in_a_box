@@ -1,0 +1,40 @@
+# qa_bot_in_a_box
+
+
+  ┌───────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────┬────────────┬─────────┐
+  │                           #                           │                          Title                           │ Blocked by │ Status  │                            
+  ├───────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┼────────────┼─────────┤
+  │ https://github.com/derekyim/qa_bot_in_a_box/issues/2  │ Slice 1: Monorepo scaffold                               │ None       │ Ready   │                            
+  ├───────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┼────────────┼─────────┤                          
+  │ https://github.com/derekyim/qa_bot_in_a_box/issues/3  │ Slice 2: Basic spider + test case storage                │ #2         │ Blocked │
+  ├───────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┼────────────┼─────────┤
+  │ https://github.com/derekyim/qa_bot_in_a_box/issues/4  │ Slice 3: Format A runner + visual diff + basic dashboard │ #3         │ Blocked │
+  ├───────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┼────────────┼─────────┤
+  │ https://github.com/derekyim/qa_bot_in_a_box/issues/5  │ Slice 4: LLM Judge + configurable model                  │ #4         │ Blocked │
+  ├───────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┼────────────┼─────────┤
+  │ https://github.com/derekyim/qa_bot_in_a_box/issues/6  │ Slice 5: Authenticated crawl                             │ #3         │ Blocked │
+  ├───────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┼────────────┼─────────┤
+  │ https://github.com/derekyim/qa_bot_in_a_box/issues/7  │ Slice 6: Blacklist manager                               │ #3         │ Blocked │
+  ├───────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┼────────────┼─────────┤
+  │ https://github.com/derekyim/qa_bot_in_a_box/issues/8  │ Slice 7: Format B recording + semantic runner            │ #3, #5     │ Blocked │
+  ├───────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┼────────────┼─────────┤
+  │ https://github.com/derekyim/qa_bot_in_a_box/issues/9  │ Slice 8: Run history + dashboard history view            │ #5         │ Blocked │
+  ├───────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┼────────────┼─────────┤
+  │ https://github.com/derekyim/qa_bot_in_a_box/issues/10 │ Slice 9: OpenClaw adapter stub + comprehensive README    │ #5         │ Blocked │
+  └───────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────┴────────────┴─────────┘
+
+  #2 is the only one ready to start. Once #3 is done, slices 5, 6, and 7 can all be worked in parallel.
+
+
+ ./ralph_mac --branch=main --local_single_folder==/Users/dereky/old/personal/code/ai-makerspace-code/qa_bot_in_a_box’ --auto_approve_pr=true 2 5;  ./ralph_mac --branch=main --local_single_folder==../qa_bot_in_a_box --auto_approve_pr=true 3 5;   ./ralph_mac --branch=main --local_single_folder==../qa_bot_in_a_box --auto_approve_pr=true 4 5;    ./ralph_mac --branch=main --local_single_folder==../qa_bot_in_a_box --auto_approve_pr=true 5 5;     ./ralph_mac --branch=main --local_single_folder==../qa_bot_in_a_box --auto_approve_pr=true 6 5;      ./ralph_mac --branch=main --local_single_folder==../qa_bot_in_a_box --auto_approve_pr=true 7 5;       ./ralph_mac --branch=main --local_single_folder==../qa_bot_in_a_box --auto_approve_pr=true 8 5;   ./ralph_mac --branch=main --local_single_folder==../qa_bot_in_a_box --auto_approve_pr=true 9 5;
+
+
+nvm use v20; ./ralph_mac --local_single_folder=/Users/dereky/old/personal/code/ai-makerspace-code/qa_bot_in_a_box --branch=main --repo=https://github.com/derekyim/qa_bot_in_a_box  2 1; ./ralph_mac --local_single_folder=/Users/dereky/old/personal/code/ai-makerspace-code/qa_bot_in_a_box --branch=main --repo=https://github.com/derekyim/qa_bo\
+t_in_a_box  2 1;
+
+  const stagehand = new Stagehand({                                                                                                                                      
+    env: "LOCAL",           // ← no Browserbase needed                                                                                                                   
+    modelName: "anthropic/claude-haiku-4-5",  // your existing model choice                                                                                              
+    modelClientOptions: { apiKey: process.env.ANTHROPIC_API_KEY }                                                                                                        
+  }) 
+
