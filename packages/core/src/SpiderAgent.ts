@@ -2,16 +2,22 @@ import { chromium } from 'playwright';
 import { randomUUID } from 'crypto';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
-import type { TestCase, FormatAStep } from './types.js';
+import type { TestCase, FormatAStep, FormatBStep } from './types.js';
 import type { TestCaseStore } from './TestCaseStore.js';
 import type { CredentialManager } from './CredentialManager.js';
 import type { BlacklistManager } from './BlacklistManager.js';
+
+export interface StagehandModelConfig {
+  apiKey: string;
+  modelName?: string;
+}
 
 export class SpiderAgent {
   constructor(
     private readonly store: TestCaseStore,
     private readonly credentialManager?: CredentialManager,
     private readonly blacklistManager?: BlacklistManager,
+    private readonly stagehandModelConfig?: StagehandModelConfig,
   ) {}
 
   async crawl(rootUrl: string): Promise<void> {
@@ -21,6 +27,22 @@ export class SpiderAgent {
 
     const browser = await chromium.launch({ headless: true });
     const context = await browser.newContext();
+
+    // Optionally initialise Stagehand for Format B step discovery
+    let stagehand: import('@browserbasehq/stagehand').Stagehand | null = null;
+    if (this.stagehandModelConfig) {
+      const { Stagehand } = await import('@browserbasehq/stagehand');
+      stagehand = new Stagehand({
+        env: 'LOCAL',
+        model: {
+          modelName: this.stagehandModelConfig.modelName ?? 'anthropic/claude-haiku-4-5-20251001',
+          apiKey: this.stagehandModelConfig.apiKey,
+        },
+        verbose: 0,
+        disablePino: true,
+      });
+      await stagehand.init();
+    }
 
     try {
       const credentials = this.credentialManager?.getCredentials() ?? null;
@@ -53,8 +75,34 @@ export class SpiderAgent {
           if (new URL(finalUrl).origin !== origin) continue;
 
           const steps: FormatAStep[] = [{ type: 'navigate', url }];
+
+          // Discover Format B steps via Stagehand observe()
+          let formatBSteps: FormatBStep[] = [];
+          if (stagehand) {
+            try {
+              const stagehandPage = stagehand.context.activePage();
+              if (stagehandPage) {
+                await stagehandPage.goto(url, { waitUntil: 'domcontentloaded' });
+              }
+              const actions = await stagehand.observe();
+              formatBSteps = actions.map((a) => ({
+                intent: a.description,
+                selector: a.selector,
+                url,
+              }));
+            } catch {
+              // observe failed — continue without Format B steps for this page
+            }
+          }
+
           const id = randomUUID();
-          const tc: TestCase = { id, url, createdAt: new Date().toISOString(), steps };
+          const tc: TestCase = {
+            id,
+            url,
+            createdAt: new Date().toISOString(),
+            steps,
+            formatBSteps: formatBSteps.length > 0 ? formatBSteps : undefined,
+          };
 
           await this.store.save(tc);
 
@@ -85,6 +133,7 @@ export class SpiderAgent {
     } finally {
       await context.close();
       await browser.close();
+      if (stagehand) await stagehand.close();
     }
   }
 
