@@ -58,7 +58,8 @@ program
     const testCaseStore = new TestCaseStore(DATA_DIR);
     const runStore = new RunStore(DATA_DIR);
     const blacklist = new BlacklistManager(DATA_DIR);
-    const runner = new PlaywrightRunner(testCaseStore, runStore, {}, blacklist);
+    const nlApiKey = process.env['ANTHROPIC_API_KEY'];
+    const runner = new PlaywrightRunner(testCaseStore, runStore, {}, blacklist, nlApiKey);
 
     let ids: string[];
     if (opts.test) {

@@ -7,6 +7,7 @@ import type { RunStore } from './RunStore.js';
 import type { RunResult, RunStep } from './types.js';
 import { VisualDiffEngine } from './VisualDiffEngine.js';
 import type { BlacklistManager } from './BlacklistManager.js';
+import { resolveNlSelector } from './NlSelectorResolver.js';
 
 export interface PlaywrightRunnerOptions {
   /** Max allowed diff percentage before a step is marked failed. Default: 0 (any diff = fail) */
@@ -22,6 +23,7 @@ export class PlaywrightRunner {
     private readonly runStore: RunStore,
     options: PlaywrightRunnerOptions = {},
     private readonly blacklistManager?: BlacklistManager,
+    private readonly nlResolverApiKey?: string,
   ) {
     this.diffThreshold = options.diffThreshold ?? 0;
   }
@@ -125,7 +127,9 @@ export class PlaywrightRunner {
    *  1. Direct string equality match.
    *  2. CSS DOM comparison: both selectors evaluated on the live page; blocked if they
    *     resolve to the same element (handles different selectors targeting the same node).
-   *  (LLM-assisted resolution for NL selectors is not yet implemented.)
+   *  3. LLM-assisted resolution: when the blacklist selector is not valid CSS (i.e. it is a
+   *     natural-language description), a screenshot is taken and the LLM is asked whether the
+   *     element matches the description.  Requires nlResolverApiKey to be set.
    */
   private async isSelectorBlacklisted(
     page: import('playwright').Page,
@@ -135,6 +139,7 @@ export class PlaywrightRunner {
     for (const bl of blacklistedSelectors) {
       if (bl === stepSelector) return true;
       // CSS DOM comparison
+      let cssMatchFailed = false;
       try {
         const sameElement = await page.evaluate(
           ([s1, s2]: [string, string]) => {
@@ -146,7 +151,19 @@ export class PlaywrightRunner {
         );
         if (sameElement) return true;
       } catch {
-        // bl is not a valid CSS selector (e.g. NL description) — CSS match failed
+        // bl threw during querySelector — likely not a valid CSS selector (NL description)
+        cssMatchFailed = true;
+      }
+      // LLM fallback: only when CSS evaluation threw (NL selector) and API key is available
+      if (cssMatchFailed && this.nlResolverApiKey) {
+        const screenshot = await page.screenshot();
+        const match = await resolveNlSelector({
+          screenshot,
+          stepSelector,
+          nlDescription: bl,
+          apiKey: this.nlResolverApiKey,
+        });
+        if (match) return true;
       }
     }
     return false;
