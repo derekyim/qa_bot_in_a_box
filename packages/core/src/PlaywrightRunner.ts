@@ -56,7 +56,7 @@ export class PlaywrightRunner {
           const blacklisted = this.blacklistManager
             ? await this.blacklistManager.getBlacklistedSelectors(currentUrl)
             : [];
-          if (!blacklisted.includes(step.selector)) {
+          if (!(await this.isSelectorBlacklisted(page, step.selector, blacklisted))) {
             await page.click(step.selector);
           }
         } else if (step.type === 'fill') {
@@ -64,7 +64,7 @@ export class PlaywrightRunner {
           const blacklisted = this.blacklistManager
             ? await this.blacklistManager.getBlacklistedSelectors(currentUrl)
             : [];
-          if (!blacklisted.includes(step.selector)) {
+          if (!(await this.isSelectorBlacklisted(page, step.selector, blacklisted))) {
             await page.fill(step.selector, step.value);
           }
         }
@@ -117,5 +117,38 @@ export class PlaywrightRunner {
 
     await this.runStore.save(result);
     return result;
+  }
+
+  /**
+   * Returns true if the step's selector should be blocked.
+   * Resolution order:
+   *  1. Direct string equality match.
+   *  2. CSS DOM comparison: both selectors evaluated on the live page; blocked if they
+   *     resolve to the same element (handles different selectors targeting the same node).
+   *  (LLM-assisted resolution for NL selectors is not yet implemented.)
+   */
+  private async isSelectorBlacklisted(
+    page: import('playwright').Page,
+    stepSelector: string,
+    blacklistedSelectors: string[],
+  ): Promise<boolean> {
+    for (const bl of blacklistedSelectors) {
+      if (bl === stepSelector) return true;
+      // CSS DOM comparison
+      try {
+        const sameElement = await page.evaluate(
+          ([s1, s2]: [string, string]) => {
+            const el1 = document.querySelector(s1);
+            const el2 = document.querySelector(s2);
+            return el1 !== null && el2 !== null && el1 === el2;
+          },
+          [bl, stepSelector] as [string, string],
+        );
+        if (sameElement) return true;
+      } catch {
+        // bl is not a valid CSS selector (e.g. NL description) — CSS match failed
+      }
+    }
+    return false;
   }
 }

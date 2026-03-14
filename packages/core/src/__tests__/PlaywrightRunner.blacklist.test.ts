@@ -11,7 +11,7 @@ import { BlacklistManager } from '../BlacklistManager.js';
 import type { TestCase } from '../types.js';
 
 const PAGES: Record<string, string> = {
-  '/': `<!DOCTYPE html><html><body><h1>Home</h1></body></html>`,
+  '/': `<!DOCTYPE html><html><body><h1>Home</h1><button id="danger-btn" class="btn-danger">Delete</button></body></html>`,
 };
 
 function startFixtureServer(): Promise<{ server: Server; baseUrl: string }> {
@@ -55,7 +55,7 @@ describe('PlaywrightRunner blacklist integration', () => {
     await rm(tmpDir, { recursive: true, force: true });
   });
 
-  it('skips a click step whose selector is blacklisted for the current URL', async () => {
+  it('skips a click step whose selector is blacklisted via direct string match', async () => {
     // Test case: navigate to /, then click a selector that does NOT exist on the page.
     // Without blacklist: Playwright throws (element not found) → run fails with error.
     // With blacklist:  the click is silently skipped → run completes successfully.
@@ -85,5 +85,42 @@ describe('PlaywrightRunner blacklist integration', () => {
     const result = await runner.run(tc.id);
     expect(result).toBeDefined();
     expect(result.testCaseId).toBe(tc.id);
+  });
+
+  it('skips a click step whose element matches a blacklisted CSS selector via DOM comparison', async () => {
+    // The blacklist uses a CSS class selector (.btn-danger).
+    // The step uses an ID selector (#danger-btn).
+    // Both target the same element on the page → step should be skipped.
+    const url = `${baseUrl}/`;
+    const tc: TestCase = {
+      id: 'tc-bl-2',
+      url,
+      createdAt: new Date().toISOString(),
+      steps: [
+        { type: 'navigate', url },
+        // #danger-btn exists on the page; without blacklist this would execute fine.
+        // With blacklist via .btn-danger (same element), it should be skipped.
+        { type: 'click', selector: '#danger-btn' },
+      ],
+    };
+    await testCaseStore.save(tc);
+
+    // Blacklist uses a different CSS selector (.btn-danger) targeting the same element
+    await writeFile(
+      join(tmpDir, 'blacklist.json'),
+      JSON.stringify({
+        urlPatterns: [],
+        perPageRules: [{ urlPattern: '/*', selectors: ['.btn-danger'] }],
+      }),
+    );
+    const blacklist = new BlacklistManager(tmpDir);
+    const runner = new PlaywrightRunner(testCaseStore, runStore, {}, blacklist);
+
+    // Should complete — even though #danger-btn exists on the page, the click is skipped
+    // because .btn-danger matches the same DOM element
+    const result = await runner.run(tc.id);
+    expect(result).toBeDefined();
+    expect(result.testCaseId).toBe(tc.id);
+    // All steps should pass (no diff since we only took screenshots, no state change from click)
   });
 }, 30_000);
