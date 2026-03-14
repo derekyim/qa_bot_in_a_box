@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { program } from 'commander';
 import { resolve } from 'path';
-import { SpiderAgent, TestCaseStore, RunStore, PlaywrightRunner } from '@qa-bot/core';
+import { SpiderAgent, TestCaseStore, RunStore, PlaywrightRunner, BlacklistManager } from '@qa-bot/core';
 
 export const CLI_VERSION = '0.1.0';
 
@@ -17,7 +17,8 @@ program
   .description('Crawl a URL and record test cases')
   .action(async (url: string) => {
     const store = new TestCaseStore(DATA_DIR);
-    const spider = new SpiderAgent(store);
+    const blacklist = new BlacklistManager(DATA_DIR);
+    const spider = new SpiderAgent(store, undefined, blacklist);
     console.log(`Crawling ${url} ...`);
     await spider.crawl(url);
     const cases = await store.list();
@@ -56,7 +57,8 @@ program
 
     const testCaseStore = new TestCaseStore(DATA_DIR);
     const runStore = new RunStore(DATA_DIR);
-    const runner = new PlaywrightRunner(testCaseStore, runStore);
+    const blacklist = new BlacklistManager(DATA_DIR);
+    const runner = new PlaywrightRunner(testCaseStore, runStore, {}, blacklist);
 
     let ids: string[];
     if (opts.test) {

@@ -16,4 +16,5 @@ export { VisualDiffEngine } from './VisualDiffEngine.js';
 export { LLMJudge } from './LLMJudge.js';
 export { CredentialManager } from './CredentialManager.js';
 export type { Credentials } from './CredentialManager.js';
+export { BlacklistManager } from './BlacklistManager.js';
 export type { TestCase, FormatAStep, RunResult, RunStep, LLMVerdict } from './types.js';

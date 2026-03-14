@@ -6,6 +6,7 @@ import type { TestCaseStore } from './TestCaseStore.js';
 import type { RunStore } from './RunStore.js';
 import type { RunResult, RunStep } from './types.js';
 import { VisualDiffEngine } from './VisualDiffEngine.js';
+import type { BlacklistManager } from './BlacklistManager.js';
 
 export interface PlaywrightRunnerOptions {
   /** Max allowed diff percentage before a step is marked failed. Default: 0 (any diff = fail) */
@@ -20,6 +21,7 @@ export class PlaywrightRunner {
     private readonly testCaseStore: TestCaseStore,
     private readonly runStore: RunStore,
     options: PlaywrightRunnerOptions = {},
+    private readonly blacklistManager?: BlacklistManager,
   ) {
     this.diffThreshold = options.diffThreshold ?? 0;
   }
@@ -50,9 +52,21 @@ export class PlaywrightRunner {
         if (step.type === 'navigate') {
           await page.goto(step.url, { waitUntil: 'domcontentloaded', timeout: 15_000 });
         } else if (step.type === 'click') {
-          await page.click(step.selector);
+          const currentUrl = page.url();
+          const blacklisted = this.blacklistManager
+            ? await this.blacklistManager.getBlacklistedSelectors(currentUrl)
+            : [];
+          if (!blacklisted.includes(step.selector)) {
+            await page.click(step.selector);
+          }
         } else if (step.type === 'fill') {
-          await page.fill(step.selector, step.value);
+          const currentUrl = page.url();
+          const blacklisted = this.blacklistManager
+            ? await this.blacklistManager.getBlacklistedSelectors(currentUrl)
+            : [];
+          if (!blacklisted.includes(step.selector)) {
+            await page.fill(step.selector, step.value);
+          }
         }
 
         const currentScreenshot = await page.screenshot();

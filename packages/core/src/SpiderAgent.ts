@@ -5,11 +5,13 @@ import { join } from 'path';
 import type { TestCase, FormatAStep } from './types.js';
 import type { TestCaseStore } from './TestCaseStore.js';
 import type { CredentialManager } from './CredentialManager.js';
+import type { BlacklistManager } from './BlacklistManager.js';
 
 export class SpiderAgent {
   constructor(
     private readonly store: TestCaseStore,
     private readonly credentialManager?: CredentialManager,
+    private readonly blacklistManager?: BlacklistManager,
   ) {}
 
   async crawl(rootUrl: string): Promise<void> {
@@ -39,6 +41,8 @@ export class SpiderAgent {
         const url = queue.shift()!;
         if (visited.has(url)) continue;
         visited.add(url);
+
+        if (this.blacklistManager && await this.blacklistManager.isUrlBlacklisted(url)) continue;
 
         const page = await context.newPage();
         try {
