@@ -19,7 +19,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@qa-bot/core": "workspace:*"
+    "@qa-bot/core": "workspace:*",
+    "@qa-bot/dashboard": "workspace:*",
+    "commander": "^14.0.3"
   },
   "devDependencies": {
     "typescript": "^5.5.0"
