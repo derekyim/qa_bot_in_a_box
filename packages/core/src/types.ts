@@ -10,12 +10,19 @@ export interface TestCase {
   steps: FormatAStep[];
 }
 
+export interface LLMVerdict {
+  verdict: 'pass' | 'fail';
+  confidence: number;
+  reasoning: string;
+}
+
 export interface RunStep {
   stepIndex: number;
   screenshotPath: string;
   diffImagePath: string;
   diffPercentage: number;
   passed: boolean;
+  llmVerdict?: LLMVerdict;
 }
 
 export interface RunResult {

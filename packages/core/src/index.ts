@@ -13,4 +13,5 @@ export { SpiderAgent } from './SpiderAgent.js';
 export { RunStore } from './RunStore.js';
 export { PlaywrightRunner } from './PlaywrightRunner.js';
 export { VisualDiffEngine } from './VisualDiffEngine.js';
-export type { TestCase, FormatAStep, RunResult, RunStep } from './types.js';
+export { LLMJudge } from './LLMJudge.js';
+export type { TestCase, FormatAStep, RunResult, RunStep, LLMVerdict } from './types.js';
