@@ -83,6 +83,7 @@ describe('PlaywrightRunner integration', () => {
     expect(result).toBeDefined();
     expect(result.testCaseId).toBe(tc.id);
     expect(result.steps.length).toBeGreaterThan(0);
+    expect(result.runnerType).toBe('playwright');
   });
 
   it('saves the run result to disk', async () => {

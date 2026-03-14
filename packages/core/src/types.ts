@@ -35,6 +35,7 @@ export interface RunStep {
 export interface RunResult {
   runId: string;
   testCaseId: string;
+  runnerType: 'playwright' | 'semantic';
   startedAt: string;
   finishedAt: string;
   passed: boolean;

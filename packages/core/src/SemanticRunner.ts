@@ -106,6 +106,7 @@ export class SemanticRunner {
     const result: RunResult = {
       runId,
       testCaseId,
+      runnerType: 'semantic',
       startedAt,
       finishedAt: new Date().toISOString(),
       passed,
