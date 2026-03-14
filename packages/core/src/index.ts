@@ -14,4 +14,6 @@ export { RunStore } from './RunStore.js';
 export { PlaywrightRunner } from './PlaywrightRunner.js';
 export { VisualDiffEngine } from './VisualDiffEngine.js';
 export { LLMJudge } from './LLMJudge.js';
+export { CredentialManager } from './CredentialManager.js';
+export type { Credentials } from './CredentialManager.js';
 export type { TestCase, FormatAStep, RunResult, RunStep, LLMVerdict } from './types.js';
