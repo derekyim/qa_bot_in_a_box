@@ -7,3 +7,7 @@ export interface QaBotCore {
 export function createQaBotCore(): QaBotCore {
   return { version: VERSION };
 }
+
+export { TestCaseStore } from './TestCaseStore.js';
+export { SpiderAgent } from './SpiderAgent.js';
+export type { TestCase, FormatAStep } from './types.js';
